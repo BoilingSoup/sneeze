@@ -1,5 +1,6 @@
 <?php
 
+// TODO: rename namespaces
 namespace Laravel\Breeze\Console;
 
 use Illuminate\Console\Command;
@@ -19,30 +20,35 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\select;
 
-#[AsCommand(name: 'breeze:install')]
+#[AsCommand(name: 'sneeze:install')]
 class InstallCommand extends Command implements PromptsForMissingInput
 {
-    use InstallsApiStack, InstallsBladeStack, InstallsInertiaStacks, InstallsLivewireStack;
+    use InstallsApiStack; // TODO: delete  InstallsBladeStack, InstallsInertiaStacks, InstallsLivewireStack;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'breeze:install {stack : The development stack that should be installed (blade,livewire,livewire-functional,react,vue,api)}
-                            {--dark : Indicate that dark mode support should be installed}
+    protected $signature = 'sneeze:install
                             {--pest : Indicate that Pest should be installed}
-                            {--ssr : Indicates if Inertia SSR support should be installed}
-                            {--typescript : Indicates if TypeScript is preferred for the Inertia stack}
-                            {--eslint : Indicates if ESLint with Prettier should be installed}
                             {--composer=global : Absolute path to the Composer binary which should be used to install packages}';
+    // TODO: delete
+    // 
+    // protected $signature = 'sneeze:install {stack : The development stack that should be installed (blade,livewire,livewire-functional,react,vue,api)}
+    //                         {--dark : Indicate that dark mode support should be installed}
+    //                         {--pest : Indicate that Pest should be installed}
+    //                         {--ssr : Indicates if Inertia SSR support should be installed}
+    //                         {--typescript : Indicates if TypeScript is preferred for the Inertia stack}
+    //                         {--eslint : Indicates if ESLint with Prettier should be installed}
+    //                         {--composer=global : Absolute path to the Composer binary which should be used to install packages}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Install the Breeze controllers and resources';
+    protected $description = 'Install the Sneeze controllers and resources';
 
     /**
      * Execute the console command.
@@ -51,27 +57,31 @@ class InstallCommand extends Command implements PromptsForMissingInput
      */
     public function handle()
     {
-        if ($this->argument('stack') === 'vue') {
-            return $this->installInertiaVueStack();
-        } elseif ($this->argument('stack') === 'react') {
-            return $this->installInertiaReactStack();
-        } elseif ($this->argument('stack') === 'api') {
-            return $this->installApiStack();
-        } elseif ($this->argument('stack') === 'blade') {
-            return $this->installBladeStack();
-        } elseif ($this->argument('stack') === 'livewire') {
-            return $this->installLivewireStack();
-        } elseif ($this->argument('stack') === 'livewire-functional') {
-            return $this->installLivewireStack(true);
-        }
+        return $this->installApiStack();
 
-        $this->components->error('Invalid stack. Supported stacks are [blade], [livewire], [livewire-functional], [react], [vue], and [api].');
-
-        return 1;
+        // TODO: delete
+        //
+        // if ($this->argument('stack') === 'vue') {
+        //     return $this->installInertiaVueStack();
+        // } elseif ($this->argument('stack') === 'react') {
+        //     return $this->installInertiaReactStack();
+        // } elseif ($this->argument('stack') === 'api') {
+        //     return $this->installApiStack();
+        // } elseif ($this->argument('stack') === 'blade') {
+        //     return $this->installBladeStack();
+        // } elseif ($this->argument('stack') === 'livewire') {
+        //     return $this->installLivewireStack();
+        // } elseif ($this->argument('stack') === 'livewire-functional') {
+        //     return $this->installLivewireStack(true);
+        // }
+        //
+        // $this->components->error('Invalid stack. Supported stacks are [blade], [livewire], [livewire-functional], [react], [vue], and [api].');
+        //
+        // return 1;
     }
 
     /**
-     * Install Breeze's tests.
+     * Install Sneeze's tests.
      *
      * @return bool
      */
@@ -95,11 +105,11 @@ class InstallCommand extends Command implements PromptsForMissingInput
                 return false;
             }
 
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Feature', base_path('tests/Feature'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Unit', base_path('tests/Unit'));
-            (new Filesystem)->copy(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Pest.php', base_path('tests/Pest.php'));
+            (new Filesystem)->copyDirectory(__DIR__ . '/../../stubs/' . $stubStack . '/pest-tests/Feature', base_path('tests/Feature'));
+            (new Filesystem)->copyDirectory(__DIR__ . '/../../stubs/' . $stubStack . '/pest-tests/Unit', base_path('tests/Unit'));
+            (new Filesystem)->copy(__DIR__ . '/../../stubs/' . $stubStack . '/pest-tests/Pest.php', base_path('tests/Pest.php'));
         } else {
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/tests/Feature', base_path('tests/Feature'));
+            (new Filesystem)->copyDirectory(__DIR__ . '/../../stubs/' . $stubStack . '/tests/Feature', base_path('tests/Feature'));
         }
 
         return true;
@@ -118,17 +128,17 @@ class InstallCommand extends Command implements PromptsForMissingInput
         $bootstrapApp = file_get_contents(base_path('bootstrap/app.php'));
 
         $names = collect(Arr::wrap($names))
-            ->filter(fn ($name) => ! Str::contains($bootstrapApp, $name))
+            ->filter(fn($name) => ! Str::contains($bootstrapApp, $name))
             ->whenNotEmpty(function ($names) use ($bootstrapApp, $group, $modifier) {
-                $names = $names->map(fn ($name) => "$name")->implode(','.PHP_EOL.'            ');
+                $names = $names->map(fn($name) => "$name")->implode(',' . PHP_EOL . '            ');
 
                 $bootstrapApp = str_replace(
                     '->withMiddleware(function (Middleware $middleware) {',
                     '->withMiddleware(function (Middleware $middleware) {'
-                        .PHP_EOL."        \$middleware->$group($modifier: ["
-                        .PHP_EOL."            $names,"
-                        .PHP_EOL.'        ]);'
-                        .PHP_EOL,
+                        . PHP_EOL . "        \$middleware->$group($modifier: ["
+                        . PHP_EOL . "            $names,"
+                        . PHP_EOL . '        ]);'
+                        . PHP_EOL,
                     $bootstrapApp,
                 );
 
@@ -147,17 +157,17 @@ class InstallCommand extends Command implements PromptsForMissingInput
         $bootstrapApp = file_get_contents(base_path('bootstrap/app.php'));
 
         $aliases = collect($aliases)
-            ->filter(fn ($alias) => ! Str::contains($bootstrapApp, $alias))
+            ->filter(fn($alias) => ! Str::contains($bootstrapApp, $alias))
             ->whenNotEmpty(function ($aliases) use ($bootstrapApp) {
-                $aliases = $aliases->map(fn ($name, $alias) => "'$alias' => $name")->implode(','.PHP_EOL.'            ');
+                $aliases = $aliases->map(fn($name, $alias) => "'$alias' => $name")->implode(',' . PHP_EOL . '            ');
 
                 $bootstrapApp = str_replace(
                     '->withMiddleware(function (Middleware $middleware) {',
                     '->withMiddleware(function (Middleware $middleware) {'
-                        .PHP_EOL.'        $middleware->alias(['
-                        .PHP_EOL."            $aliases,"
-                        .PHP_EOL.'        ]);'
-                        .PHP_EOL,
+                        . PHP_EOL . '        $middleware->alias(['
+                        . PHP_EOL . "            $aliases,"
+                        . PHP_EOL . '        ]);'
+                        . PHP_EOL,
                     $bootstrapApp,
                 );
 
@@ -258,7 +268,7 @@ class InstallCommand extends Command implements PromptsForMissingInput
 
         file_put_contents(
             base_path('package.json'),
-            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).PHP_EOL
+            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL
         );
     }
 
@@ -281,7 +291,7 @@ class InstallCommand extends Command implements PromptsForMissingInput
 
         file_put_contents(
             base_path('package.json'),
-            json_encode($content, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).PHP_EOL
+            json_encode($content, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL
         );
     }
 
@@ -345,12 +355,12 @@ class InstallCommand extends Command implements PromptsForMissingInput
             try {
                 $process->setTty(true);
             } catch (RuntimeException $e) {
-                $this->output->writeln('  <bg=yellow;fg=black> WARN </> '.$e->getMessage().PHP_EOL);
+                $this->output->writeln('  <bg=yellow;fg=black> WARN </> ' . $e->getMessage() . PHP_EOL);
             }
         }
 
         $process->run(function ($type, $line) {
-            $this->output->write('    '.$line);
+            $this->output->write('    ' . $line);
         });
     }
 
@@ -374,7 +384,7 @@ class InstallCommand extends Command implements PromptsForMissingInput
     protected function promptForMissingArgumentsUsing()
     {
         return [
-            'stack' => fn () => select(
+            'stack' => fn() => select(
                 label: 'Which Breeze stack would you like to install?',
                 options: [
                     'blade' => 'Blade with Alpine',
@@ -408,7 +418,7 @@ class InstallCommand extends Command implements PromptsForMissingInput
                     'eslint' => 'ESLint with Prettier',
                 ],
                 hint: 'Use the space bar to select options.'
-            ))->each(fn ($option) => $input->setOption($option, true));
+            ))->each(fn($option) => $input->setOption($option, true));
         } elseif (in_array($stack, ['blade', 'livewire', 'livewire-functional'])) {
             $input->setOption('dark', confirm(
                 label: 'Would you like dark mode support?',
