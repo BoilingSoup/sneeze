@@ -1,11 +1,11 @@
 <?php
 
-namespace Laravel\Breeze;
+namespace BoilingSoup\Sneeze;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class BreezeServiceProvider extends ServiceProvider implements DeferrableProvider
+class SneezeServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register any application services.

@@ -3,7 +3,8 @@
   "description": "Minimal Laravel stateless authentication scaffolding.",
   "keywords": [
     "laravel",
-    "auth"
+    "auth",
+    "sneeze"
   ],
   "license": "MIT",
   "support": {
@@ -31,13 +32,13 @@
   },
   "autoload": {
     "psr-4": {
-      "Laravel\\Breeze\\": "src/"
+      "BoilingSoup\\Sneeze\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Laravel\\Breeze\\BreezeServiceProvider"
+        "BoilingSoup\\Sneeze\\SneezeServiceProvider"
       ]
     }
   },

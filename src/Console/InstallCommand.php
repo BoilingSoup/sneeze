@@ -1,7 +1,6 @@
 <?php
 
-// TODO: rename namespaces
-namespace Laravel\Breeze\Console;
+namespace BoilingSoup\Sneeze\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;

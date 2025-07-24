@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Breeze\Console;
+namespace BoilingSoup\Sneeze\Console;
 
 use Illuminate\Filesystem\Filesystem;
 
@@ -19,10 +19,10 @@ trait InstallsApiStack
 
         // Controllers...
         $files->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        $files->copyDirectory(__DIR__.'/../../stubs/api/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
 
         // Middleware...
-        $files->copyDirectory(__DIR__.'/../../stubs/api/app/Http/Middleware', app_path('Http/Middleware'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Middleware', app_path('Http/Middleware'));
 
         $this->installMiddlewareAliases([
             'verified' => '\App\Http\Middleware\EnsureEmailIsVerified::class',
@@ -34,18 +34,18 @@ trait InstallsApiStack
 
         // Requests...
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        $files->copyDirectory(__DIR__.'/../../stubs/api/app/Http/Requests/Auth', app_path('Http/Requests/Auth'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Requests/Auth', app_path('Http/Requests/Auth'));
 
         // Providers...
-        $files->copyDirectory(__DIR__.'/../../stubs/api/app/Providers', app_path('Providers'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Providers', app_path('Providers'));
 
         // Routes...
-        copy(__DIR__.'/../../stubs/api/routes/api.php', base_path('routes/api.php'));
-        copy(__DIR__.'/../../stubs/api/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/api/routes/auth.php', base_path('routes/auth.php'));
+        copy(__DIR__ . '/../../stubs/api/routes/api.php', base_path('routes/api.php'));
+        copy(__DIR__ . '/../../stubs/api/routes/web.php', base_path('routes/web.php'));
+        copy(__DIR__ . '/../../stubs/api/routes/auth.php', base_path('routes/auth.php'));
 
         // Configuration...
-        $files->copyDirectory(__DIR__.'/../../stubs/api/config', config_path());
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/config', config_path());
 
         // Environment...
         if (! $files->exists(base_path('.env'))) {
@@ -54,7 +54,7 @@ trait InstallsApiStack
 
         file_put_contents(
             base_path('.env'),
-            preg_replace('/APP_URL=(.*)/', 'APP_URL=http://localhost:8000'.PHP_EOL.'FRONTEND_URL=http://localhost:3000', file_get_contents(base_path('.env')))
+            preg_replace('/APP_URL=(.*)/', 'APP_URL=http://localhost:8000' . PHP_EOL . 'FRONTEND_URL=http://localhost:3000', file_get_contents(base_path('.env')))
         );
 
         // Tests...
