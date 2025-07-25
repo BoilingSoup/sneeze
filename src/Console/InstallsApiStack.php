@@ -28,6 +28,8 @@ trait InstallsApiStack
             'verified' => '\App\Http\Middleware\EnsureEmailIsVerified::class',
         ]);
 
+        // NOTE: Adds middleware in case user later adds stateful authentication. Why not ¯\_(ツ)_/¯
+        // Sanctum still checks for Bearer token so this does not affect stateless authentication.
         $this->installMiddleware([
             '\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class',
         ], 'api', 'prepend');
@@ -65,9 +67,9 @@ trait InstallsApiStack
         $files->delete(base_path('tests/Feature/Auth/PasswordConfirmationTest.php'));
 
         // Cleaning...
-        $this->removeScaffoldingUnnecessaryForApis();
+        // $this->removeScaffoldingUnnecessaryForApis(); // NOTE: Probably not necessary
 
-        $this->components->info('Breeze scaffolding installed successfully.');
+        $this->components->info('Sneeze scaffolding installed successfully.');
     }
 
     /**
