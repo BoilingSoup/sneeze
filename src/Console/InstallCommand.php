@@ -124,28 +124,28 @@ class InstallCommand extends Command implements PromptsForMissingInput
      * @param  string  $modifier
      * @return void
      */
-    protected function installMiddleware($names, $group = 'web', $modifier = 'append')
-    {
-        $bootstrapApp = file_get_contents(base_path('bootstrap/app.php'));
-
-        $names = collect(Arr::wrap($names))
-            ->filter(fn($name) => ! Str::contains($bootstrapApp, $name))
-            ->whenNotEmpty(function ($names) use ($bootstrapApp, $group, $modifier) {
-                $names = $names->map(fn($name) => "$name")->implode(',' . PHP_EOL . '            ');
-
-                $bootstrapApp = str_replace(
-                    '->withMiddleware(function (Middleware $middleware): void {',
-                    '->withMiddleware(function (Middleware $middleware): void {'
-                        . PHP_EOL . "        \$middleware->$group($modifier: ["
-                        . PHP_EOL . "            $names,"
-                        . PHP_EOL . '        ]);'
-                        . PHP_EOL,
-                    $bootstrapApp,
-                );
-
-                file_put_contents(base_path('bootstrap/app.php'), $bootstrapApp);
-            });
-    }
+    // protected function installMiddleware($names, $group = 'web', $modifier = 'append')
+    // {
+    //     $bootstrapApp = file_get_contents(base_path('bootstrap/app.php'));
+    //
+    //     $names = collect(Arr::wrap($names))
+    //         ->filter(fn($name) => ! Str::contains($bootstrapApp, $name))
+    //         ->whenNotEmpty(function ($names) use ($bootstrapApp, $group, $modifier) {
+    //             $names = $names->map(fn($name) => "$name")->implode(',' . PHP_EOL . '            ');
+    //
+    //             $bootstrapApp = str_replace(
+    //                 '->withMiddleware(function (Middleware $middleware): void {',
+    //                 '->withMiddleware(function (Middleware $middleware): void {'
+    //                     . PHP_EOL . "        \$middleware->$group($modifier: ["
+    //                     . PHP_EOL . "            $names,"
+    //                     . PHP_EOL . '        ]);'
+    //                     . PHP_EOL,
+    //                 $bootstrapApp,
+    //             );
+    //
+    //             file_put_contents(base_path('bootstrap/app.php'), $bootstrapApp);
+    //         });
+    // }
 
     /**
      * Install the given middleware aliases into the application.
@@ -162,15 +162,33 @@ class InstallCommand extends Command implements PromptsForMissingInput
             ->whenNotEmpty(function ($aliases) use ($bootstrapApp) {
                 $aliases = $aliases->map(fn($name, $alias) => "'$alias' => $name")->implode(',' . PHP_EOL . '            ');
 
-                $bootstrapApp = str_replace(
-                    '->withMiddleware(function (Middleware $middleware): void {',
-                    '->withMiddleware(function (Middleware $middleware): void {'
-                        . PHP_EOL . '        $middleware->alias(['
-                        . PHP_EOL . "            $aliases,"
-                        . PHP_EOL . '        ]);'
-                        . PHP_EOL,
+                if (str_contains(
                     $bootstrapApp,
-                );
+                    '->withMiddleware(function (Middleware $middleware): void {'
+                )) {
+                    $bootstrapApp = str_replace(
+                        '->withMiddleware(function (Middleware $middleware): void {',
+                        '->withMiddleware(function (Middleware $middleware): void {'
+                            . PHP_EOL . '        $middleware->alias(['
+                            . PHP_EOL . "            $aliases,"
+                            . PHP_EOL . '        ]);'
+                            . PHP_EOL,
+                        $bootstrapApp,
+                    );
+                } else if (str_contains( // NOTE: Laravel 11 did not have :void return type
+                    $bootstrapApp,
+                    '->withMiddleware(function (Middleware $middleware) {'
+                )) {
+                    $bootstrapApp = str_replace(
+                        '->withMiddleware(function (Middleware $middleware) {',
+                        '->withMiddleware(function (Middleware $middleware) {'
+                            . PHP_EOL . '        $middleware->alias(['
+                            . PHP_EOL . "            $aliases,"
+                            . PHP_EOL . '        ]);'
+                            . PHP_EOL,
+                        $bootstrapApp,
+                    );
+                }
 
                 file_put_contents(base_path('bootstrap/app.php'), $bootstrapApp);
             });
