@@ -24,15 +24,14 @@ trait InstallsApiStack
         // Middleware...
         $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Middleware', app_path('Http/Middleware'));
 
-        $this->installMiddlewareAliases([
-            'verified' => '\App\Http\Middleware\EnsureEmailIsVerified::class',
-        ]);
+        // NOTE: maybe use middleware explicitly instead of making an alias.
+        // $this->installMiddlewareAliases([
+        //     'verified' => '\App\Http\Middleware\EnsureEmailIsVerified::class',
+        // ]);
 
-        // NOTE: Adds middleware in case user later adds stateful authentication. Why not ¯\_(ツ)_/¯
-        // Sanctum still checks for Bearer token so this does not affect stateless authentication.
-        $this->installMiddleware([
-            '\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class',
-        ], 'api', 'prepend');
+        // $this->installMiddleware([
+        //     '\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class',
+        // ], 'api', 'prepend');
 
         // Requests...
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
