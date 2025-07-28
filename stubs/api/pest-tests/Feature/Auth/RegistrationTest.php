@@ -1,7 +1,7 @@
 <?php
 
 test('new users can register', function () {
-    $response = $this->post('/register', [
+    $response = $this->post(route('register'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password',
