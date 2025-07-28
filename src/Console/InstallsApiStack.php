@@ -64,36 +64,6 @@ trait InstallsApiStack
 
         $files->delete(base_path('tests/Feature/Auth/PasswordConfirmationTest.php'));
 
-        // Cleaning...
-        // $this->removeScaffoldingUnnecessaryForApis(); // NOTE: Probably not necessary
-
         $this->components->info('Sneeze scaffolding installed successfully.');
-    }
-
-    /**
-     * Remove any application scaffolding that isn't needed for APIs.
-     *
-     * @return void
-     */
-    protected function removeScaffoldingUnnecessaryForApis()
-    {
-        $files = new Filesystem;
-
-        // Remove frontend related files...
-        $files->delete(base_path('package.json'));
-        $files->delete(base_path('vite.config.js'));
-        $files->delete(base_path('tailwind.config.js'));
-        $files->delete(base_path('postcss.config.js'));
-
-        // Remove Laravel "welcome" view...
-        $files->delete(resource_path('views/welcome.blade.php'));
-        $files->put(resource_path('views/.gitkeep'), PHP_EOL);
-
-        // Remove CSS and JavaScript directories...
-        $files->deleteDirectory(resource_path('css'));
-        $files->deleteDirectory(resource_path('js'));
-
-        // Remove the "node_modules" directory and associated lock files...
-        static::flushNodeModules();
     }
 }
