@@ -54,6 +54,13 @@ class InstallCommand extends Command
         //     '\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class',
         // ], 'api', 'prepend');
 
+        // User Model...
+        if (!$this->addHasApiTokensTraitToUser()) {
+            return 1;
+        }
+
+        $this->components->success('[Laravel\Sanctum\HasApiTokens] trait has been added to your User model successfully.');
+
         // Requests...
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
         $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Requests/Auth', app_path('Http/Requests/Auth'));
@@ -86,7 +93,7 @@ class InstallCommand extends Command
 
         $files->delete(base_path('tests/Feature/Auth/PasswordConfirmationTest.php'));
 
-        $this->components->info('Sneeze scaffolding installed successfully.');
+        $this->components->success('Sneeze scaffolding installed successfully.');
     }
 
     /**
@@ -202,6 +209,47 @@ class InstallCommand extends Command
 
                 file_put_contents(base_path('bootstrap/app.php'), $bootstrapApp);
             });
+    }
+
+    /**
+     * Add the HasApiTokens trait to the User Model
+     * 
+     * @return bool
+     */
+    protected function addHasApiTokensTraitToUser()
+    {
+        $userModelPath = base_path('app/Models/User.php');
+        $userModel = file_get_contents($userModelPath);
+
+        if ($userModel === false) {
+            return false;
+        }
+
+        $userModel = (string) $userModel;
+
+        $traitImportLine = "use Illuminate\Notifications\Notifiable;";
+
+        if (!str_contains($userModel, $traitImportLine)) {
+            return false;
+        }
+
+        $userModel = str_replace($traitImportLine, $traitImportLine . PHP_EOL . "use Laravel\Sanctum\HasApiTokens;", $userModel);
+
+        $traitsUsageLine = "use HasFactory, Notifiable;";
+
+        if (!str_contains($userModel, $traitsUsageLine)) {
+            return false;
+        }
+
+        $userModel = str_replace($traitsUsageLine, "use HasApiTokens, HasFactory, Notifiable;", $userModel);
+
+        $result = file_put_contents($userModelPath, $userModel);
+
+        if ($result === false) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
