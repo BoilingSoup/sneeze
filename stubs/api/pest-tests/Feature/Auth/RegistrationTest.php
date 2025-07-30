@@ -8,6 +8,5 @@ test('new users can register', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response->assertSuccessful()->assertJsonStructure(['token']);
 });
