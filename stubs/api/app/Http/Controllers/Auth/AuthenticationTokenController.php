@@ -8,18 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-class AuthenticatedSessionController extends Controller
+class AuthenticationTokenController extends Controller
 {
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): Response
+    public function store(LoginRequest $request)
     {
-        $request->authenticate();
+        $user = $request->authenticate();
 
-        $request->session()->regenerate();
+        $token = $user->createToken(name: 'user');
 
-        return response()->noContent();
+        return [
+            'token' => $token->plainTextToken
+        ];
     }
 
     /**
