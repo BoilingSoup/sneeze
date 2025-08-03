@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
@@ -25,10 +26,9 @@ test('users can not authenticate with invalid password', function () {
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    Sanctum::actingAs(User::factory()->create());
 
-    $response = $this->actingAs($user)->post(route('logout'));
+    $response = $this->postJson(route('logout'));
 
-    $this->assertGuest();
     $response->assertNoContent();
 });

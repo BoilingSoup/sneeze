@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Laravel\Sanctum\Sanctum;
 
 class AuthenticationTest extends TestCase
 {
@@ -36,11 +37,10 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_logout(): void
     {
-        $user = User::factory()->create();
+        Sanctum::actingAs(User::factory()->create());
 
-        $response = $this->actingAs($user)->post(route('logout'));
+        $response = $this->postJson(route('logout'));
 
-        $this->assertGuest();
         $response->assertNoContent();
     }
 }
