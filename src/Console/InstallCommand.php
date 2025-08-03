@@ -35,9 +35,13 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->runCommands(['php artisan install:api']);
-
         $files = new Filesystem;
+
+        // Migration...
+        $files->copy(__DIR__ . '/../../stubs/api/database/migrations/0001_01_01_000003_create_codes.php', base_path('database/migrations/0001_01_01_000003_create_codes.php'));
+
+        // Install Sanctum...
+        $this->runCommands(['php artisan install:api']);
 
         // Controllers...
         $files->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
