@@ -64,19 +64,25 @@ trait HasVerificationCodes
 
         $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
 
-        if ($currCode?->expires_at->isFuture()) {
+        if ($currCode !== null && $currCode->expires_at->isFuture()) {
             return null;
         }
 
-        $code = random_int(min: 10_000_000, max: 99_999_999);
+        $code = (string) random_int(min: 10_000_000, max: 99_999_999);
 
-        $this->verificationCodes()->create([
-            'code' => Hash::make($code),
-            'type' => 'password-reset',
-            'expires_at' => $expiresAt
-        ]);
+        if ($currCode === null) {
+            $this->verificationCodes()->create([
+                'code' => Hash::make($code),
+                'type' => 'password-reset',
+                'expires_at' => $expiresAt
+            ]);
+        } else {
+            $currCode->code = Hash::make($code);
+            $currCode->expires_at = $expiresAt;
+            $currCode->save();
+        }
 
-        return (string) $code;
+        return $code;
     }
 
     /**
