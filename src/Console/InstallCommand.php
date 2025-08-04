@@ -70,9 +70,6 @@ class InstallCommand extends Command
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
         $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Requests/Auth', app_path('Http/Requests/Auth'));
 
-        // Providers...
-        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Providers', app_path('Providers'));
-
         // Routes...
         copy(__DIR__ . '/../../stubs/api/routes/api.php', base_path('routes/api.php'));
         copy(__DIR__ . '/../../stubs/api/routes/web.php', base_path('routes/web.php'));
