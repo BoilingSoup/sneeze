@@ -60,16 +60,15 @@ trait HasVerificationCodes
      */
     public function createPasswordResetCode(?int $expiryInMinutes = null)
     {
-        $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
-
-        $code = (string) random_int(min: 10_000_000, max: 99_999_999);
-
         if ($expiryInMinutes === null || $expiryInMinutes <= 0) {
-            $expiryInMinutes = now()->addMinutes(config('sneeze.password_reset_expiry'));
+            $expiryInMinutes = config('sneeze.password_reset_expiry');
             Context::add('expiry', config('sneeze.password_reset_expiry'));
         } else {
             Context::add('expiry', $expiryInMinutes);
         }
+
+        $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
+        $code = (string) random_int(min: 10_000_000, max: 99_999_999);
 
         if ($currCode === null) {
             $this->verificationCodes()->create([

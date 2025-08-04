@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use BoilingSoup\Sneeze\Notifications\PasswordReset;
 use Illuminate\Support\Facades\Notification;
 
 test('reset password link can be requested', function () {
@@ -9,29 +9,27 @@ test('reset password link can be requested', function () {
 
     $user = User::factory()->create();
 
-    $this->post(route('password.email'), ['email' => $user->email]);
+    $this->postJson(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, PasswordReset::class);
 });
 
-test('password can be reset with valid token', function () {
+test('password can be reset with valid code', function () {
     Notification::fake();
 
     $user = User::factory()->create();
 
-    $this->post(route('password.email'), ['email' => $user->email]);
+    $this->postJson(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
-        $response = $this->post(route('password.store'), [
-            'token' => $notification->token,
+    Notification::assertSentTo($user, PasswordReset::class, function (object $notification) use ($user) {
+        $response = $this->postJson(route('password.store'), [
+            'code' => $notification->code,
             'email' => $user->email,
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertStatus(200);
+        $response->assertStatus(200);
 
         return true;
     });
