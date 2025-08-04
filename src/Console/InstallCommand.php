@@ -38,7 +38,7 @@ class InstallCommand extends Command
         $files = new Filesystem;
 
         // Migration...
-        $files->copy(__DIR__ . '/../../stubs/api/database/migrations/0001_01_01_000003_create_codes.php', base_path('database/migrations/0001_01_01_000003_create_codes.php'));
+        $files->copy(__DIR__ . '/../../stubs/api/database/migrations/0001_01_01_000003_create_verification_codes.php', base_path('database/migrations/0001_01_01_000003_create_verification_codes.php'));
 
         // Install Sanctum...
         $this->runCommands(['php artisan install:api']);

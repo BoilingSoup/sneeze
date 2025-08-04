@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('codes', function (Blueprint $table) {
+        Schema::create('verification_codes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained(table: 'users', column: 'id')->cascadeOnDelete();
+            $table->text('code');
+            $table->enum('type', ['password-reset', 'email-verification'])->index();
+            $table->timestamp('expires_at');
+
+            $table->unique(['user_id', 'type'], 'unique_user_type');
         });
     }
 
