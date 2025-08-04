@@ -59,11 +59,12 @@ class InstallCommand extends Command
         // ], 'api', 'prepend');
 
         // User Model...
-        if (!$this->addHasApiTokensTraitToUser()) {
+        if (!$this->updateUserModel()) {
             return 1;
         }
 
-        $this->components->success('[Laravel\Sanctum\HasApiTokens] trait has been added to your User model successfully.');
+        $this->components->info('[Laravel\Sanctum\HasApiTokens] trait has been added to your User model successfully.');
+        $this->components->info('[BoilingSoup\Sneeze\HasVerificationCodes] trait has been added to your User model successfully.');
 
         // Requests...
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
@@ -220,7 +221,7 @@ class InstallCommand extends Command
      * 
      * @return bool
      */
-    protected function addHasApiTokensTraitToUser()
+    protected function updateUserModel()
     {
         $userModelPath = base_path('app/Models/User.php');
         $userModel = file_get_contents($userModelPath);
@@ -237,7 +238,7 @@ class InstallCommand extends Command
             return false;
         }
 
-        $userModel = str_replace($traitImportLine, $traitImportLine . PHP_EOL . "use Laravel\Sanctum\HasApiTokens;", $userModel);
+        $userModel = str_replace($traitImportLine, $traitImportLine . PHP_EOL . "use Laravel\Sanctum\HasApiTokens;" . PHP_EOL . "use BoilingSoup\Sneeze\HasVerificationCodes;", $userModel);
 
         $traitsUsageLine = "use HasFactory, Notifiable;";
 
@@ -245,7 +246,7 @@ class InstallCommand extends Command
             return false;
         }
 
-        $userModel = str_replace($traitsUsageLine, "use HasApiTokens, HasFactory, Notifiable;", $userModel);
+        $userModel = str_replace($traitsUsageLine, "use HasApiTokens, HasFactory, HasVerificationCodes, Notifiable;", $userModel);
 
         $result = file_put_contents($userModelPath, $userModel);
 
