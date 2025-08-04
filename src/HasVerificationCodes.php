@@ -3,6 +3,7 @@
 namespace BoilingSoup\Sneeze;
 
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Hash;
 
 trait HasVerificationCodes
@@ -55,27 +56,30 @@ trait HasVerificationCodes
     /**
      * Create a new password reset verification code.
      *
-     * @param  \DateTimeInterface|null  $expiresAt
      * @return string|null
      */
-    public function createPasswordResetCode(?\DateTimeInterface $expiresAt = null)
+    public function createPasswordResetCode(?int $expiryInMinutes = null)
     {
         $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
 
         $code = (string) random_int(min: 10_000_000, max: 99_999_999);
 
-        // TODO: make expiry configurable.
-        $expiresAt = $expiresAt ?? now()->addMinutes(15);
+        if ($expiryInMinutes === null || $expiryInMinutes <= 0) {
+            $expiryInMinutes = now()->addMinutes(config('sneeze.password_reset_expiry'));
+            Context::add('expiry', config('sneeze.password_reset_expiry'));
+        } else {
+            Context::add('expiry', $expiryInMinutes);
+        }
 
         if ($currCode === null) {
             $this->verificationCodes()->create([
                 'code' => Hash::make($code),
                 'type' => 'password-reset',
-                'expires_at' => $expiresAt
+                'expires_at' => now()->addMinutes($expiryInMinutes)
             ]);
         } else {
             $currCode->code = Hash::make($code);
-            $currCode->expires_at = $expiresAt;
+            $currCode->expires_at = now()->addMinutes($expiryInMinutes);
             $currCode->is_used = false;
             $currCode->save();
         }

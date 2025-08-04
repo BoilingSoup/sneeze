@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Context;
 
 class PasswordReset extends Notification
 {
@@ -31,11 +32,12 @@ class PasswordReset extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $expiryInMinutes = Context::get('expiry');
+
         return (new MailMessage)
             ->subject("Reset Password Notification")
             ->line("Your password reset code is {$this->code}")
-            // TODO: un-hardcode 15 minutes.
-            ->line("The reset code will expire in 15 minutes. If you did not request a password reset, no further action is required.");
+            ->line("The reset code will expire in {$expiryInMinutes} minutes. If you did not request a password reset, no further action is required.");
     }
 
     /**

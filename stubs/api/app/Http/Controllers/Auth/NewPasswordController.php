@@ -28,7 +28,7 @@ class NewPasswordController extends Controller
 
         $user = User::where('email', $request->email)->get();
 
-        if (!$user || $user->count() !== 1) {
+        if ($user->count() !== 1) {
             return response(["message" => "We can't find a user with that email address."], 422);
         }
 
@@ -51,11 +51,11 @@ class NewPasswordController extends Controller
                 $storedCode->save();
             });
         } catch (\Exception) {
-            return response(['status' => 'Failed to update password.'], 500);
+            return response(['status' => 'Failed to reset password.'], 500);
         }
 
         event(new PasswordReset($user));
 
-        return response(['status' => 'Password was changed successfully.']);
+        return response(['status' => 'Password was reset successfully.']);
     }
 }
