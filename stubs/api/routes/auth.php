@@ -15,6 +15,7 @@ Route::post('/login', [AuthenticationTokenController::class, 'store'])
     ->name('login');
 
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->middleware('throttle:6,1')
     ->name('password.email');
 
 Route::post('/reset-password', [NewPasswordController::class, 'store'])

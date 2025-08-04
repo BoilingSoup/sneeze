@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('code');
             $table->enum('type', ['password-reset', 'email-verification'])->index();
             $table->timestamp('expires_at');
+            $table->timestamps();
 
             $table->unique(['user_id', 'type'], 'unique_user_type');
         });
