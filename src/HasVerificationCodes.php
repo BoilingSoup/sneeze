@@ -60,15 +60,12 @@ trait HasVerificationCodes
      */
     public function createPasswordResetCode(?\DateTimeInterface $expiresAt = null)
     {
-        $expiresAt = $expiresAt ?? now()->addMinutes(15);
-
         $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
 
-        if ($currCode !== null && $currCode->expires_at->isFuture()) {
-            return null;
-        }
-
         $code = (string) random_int(min: 10_000_000, max: 99_999_999);
+
+        // TODO: make expiry configurable.
+        $expiresAt = $expiresAt ?? now()->addMinutes(15);
 
         if ($currCode === null) {
             $this->verificationCodes()->create([
@@ -79,6 +76,7 @@ trait HasVerificationCodes
         } else {
             $currCode->code = Hash::make($code);
             $currCode->expires_at = $expiresAt;
+            $currCode->is_used = false;
             $currCode->save();
         }
 

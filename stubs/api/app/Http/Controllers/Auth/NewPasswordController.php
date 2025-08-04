@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 
 class NewPasswordController extends Controller
 {
@@ -38,19 +36,26 @@ class NewPasswordController extends Controller
 
         $storedCode = $user->verificationCodes()->where('type', 'password-reset')->first();
 
-        if ($storedCode === null || $storedCode->expires_at->isPast() || !Hash::check($request->code, $storedCode->code)) {
+        if ($storedCode === null || $storedCode->is_used || $storedCode->expires_at->isPast() || !Hash::check($request->code, $storedCode->code)) {
             return response(['message' => 'This password reset code is invalid.'], 403);
         }
 
-        // TODO: check if code was already used. edit migration add is_used column.
+        try {
+            DB::transaction(function () use ($request, $user, $storedCode) {
+                $user->forceFill([
+                    'password' => Hash::make($request->string('password')),
+                    'remember_token' => Str::random(60)
+                ])->save();
 
-        $user->forceFill([
-            'password' => Hash::make($request->string('password')),
-            'remember_token' => Str::random(60)
-        ])->save();
+                $storedCode->is_used = true;
+                $storedCode->save();
+            });
+        } catch (\Exception) {
+            return response(['status' => 'Failed to update password.'], 500);
+        }
 
         event(new PasswordReset($user));
 
-        return response()->json(['status' => 'Password was changed successfully.']);
+        return response(['status' => 'Password was changed successfully.']);
     }
 }

@@ -34,6 +34,7 @@ class PasswordReset extends Notification
         return (new MailMessage)
             ->subject("Reset Password Notification")
             ->line("Your password reset code is {$this->code}")
+            // TODO: un-hardcode 15 minutes.
             ->line("The reset code will expire in 15 minutes. If you did not request a password reset, no further action is required.");
     }
 
