@@ -35,7 +35,7 @@ class PasswordResetLinkController extends Controller
         }
 
         return [
-            "status" => "We have emailed your password reset link."
+            "status" => "We have emailed your password reset code."
         ];
     }
 }

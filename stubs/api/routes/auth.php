@@ -21,12 +21,12 @@ Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
     ->name('password.store');
 
-Route::post('/verify-email/{id}/{hash}', VerifyEmailController::class)
+Route::post('/verify-email', VerifyEmailController::class)
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.verify');
 
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-    ->middleware(['auth', 'throttle:6,1'])
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.send');
 
 Route::post('/logout', [AuthenticationTokenController::class, 'destroy'])

@@ -41,6 +41,7 @@ class NewPasswordController extends Controller
         }
 
         try {
+            // update User and mark password-reset Code as used.
             DB::transaction(function () use ($request, $user, $storedCode) {
                 $user->forceFill([
                     'password' => Hash::make($request->string('password')),
