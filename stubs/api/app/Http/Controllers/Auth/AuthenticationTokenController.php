@@ -16,7 +16,7 @@ class AuthenticationTokenController extends Controller
     {
         $user = $request->authenticate();
 
-        $token = $user->createToken(name: 'user');
+        $token = $user->createToken(name: 'user'); // NOTE: You may assign any name you like. Check the Sanctum docs for more information.
 
         return [
             'token' => $token->plainTextToken
@@ -24,7 +24,7 @@ class AuthenticationTokenController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * Destroy an authentication token.
      */
     public function destroy(Request $request): Response
     {

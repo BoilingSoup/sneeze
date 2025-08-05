@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        $token = $user->createToken(name: 'user');
+        $token = $user->createToken(name: 'user'); // NOTE: You may assign any name you like. Check the Sanctum docs for more information.
 
         return [
             'token' => $token->plainTextToken

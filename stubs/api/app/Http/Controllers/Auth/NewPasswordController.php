@@ -40,6 +40,8 @@ class NewPasswordController extends Controller
             return response(['status' => 'Failed to reset password.'], 500);
         }
 
+        $user->tokens()->delete();
+
         event(new PasswordReset($user));
 
         return response(['status' => 'Password was reset successfully.']);
