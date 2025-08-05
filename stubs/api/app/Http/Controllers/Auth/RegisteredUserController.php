@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-// use Illuminate\Http\Response;
-// use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
@@ -36,7 +34,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         // NOTE: You may assign any name and expiration you like. Check the Sanctum docs for more information.
-        $token = $user->createToken(name: 'user', expiresAt: now()->addMonths(1));
+        $token = $user->createToken(name: 'user', expiresAt: config('sneeze.sanctum_auth_token_expiry_fn')());
 
         return [
             'token' => $token->plainTextToken

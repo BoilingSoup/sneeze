@@ -88,12 +88,6 @@ class InstallCommand extends Command
             preg_replace('/APP_URL=(.*)/', 'APP_URL=http://localhost:8000' . PHP_EOL . 'FRONTEND_URL=http://localhost:3000', file_get_contents(base_path('.env')))
         );
 
-        file_put_contents(
-            base_path('.env'),
-            str_replace('FRONTEND_URL=http://localhost:3000', 'FRONTEND_URL=http://localhost:3000' . PHP_EOL . PHP_EOL . 'SNEEZE_EMAIL_VERIFICATION_CODE_EXPIRY_MINUTES=15' . PHP_EOL . 'SNEEZE_PASSWORD_RESET_CODE_EXPIRY_MINUTES=15', file_get_contents(base_path('.env')))
-        );
-
-
         // Tests...
         if (! $this->installTests()) {
             return 1;

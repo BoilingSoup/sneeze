@@ -2,8 +2,14 @@
 
 return [
     // Time in minutes before email verification code expires.
-    'email_verification_expiry' => (int) env('SNEEZE_EMAIL_VERIFICATION_CODE_EXPIRY_MINUTES', 15),
+    'email_verification_expiry' => 15,
 
     // Time in minutes before password reset code expires.
-    'password_reset_expiry' => (int) env('SNEEZE_PASSWORD_RESET_CODE_EXPIRY_MINUTES', 15)
+    'password_reset_expiry' => 15,
+
+    // Function to generate sanctum auth token expiry time.
+    // ex. When User registers/logs in, their token is valid for 1 month.
+    'sanctum_auth_token_expiry_fn' => function () {
+        return now()->addMonths(1);
+    }
 ];

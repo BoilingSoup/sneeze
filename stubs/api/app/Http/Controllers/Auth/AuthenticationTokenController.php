@@ -17,7 +17,7 @@ class AuthenticationTokenController extends Controller
         $user = $request->authenticate();
 
         // NOTE: You may assign any name and expiration you like. Check the Sanctum docs for more information.
-        $token = $user->createToken(name: 'user', expiresAt: now()->addMonths(1));
+        $token = $user->createToken(name: 'user', expiresAt: config('sneeze.sanctum_auth_token_expiry_fn')());
 
         return [
             'token' => $token->plainTextToken
