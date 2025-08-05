@@ -2,6 +2,7 @@
 
 namespace BoilingSoup\Sneeze;
 
+use BoilingSoup\Sneeze\Notifications\EmailVerification;
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Hash;
@@ -18,62 +19,66 @@ trait HasVerificationCodes
 
     /**
      * Create a new email verification code.
-     *
-     * @param  \DateTimeInterface|null  $expiresAt
-     * @return string
      */
-    public function createEmailVerificationCode(?\DateTimeInterface $expiresAt = null)
+    public function createEmailVerificationCode(?int $expiryInMinutes = null): void
     {
-        $expiresAt = $expiresAt ?? now()->addMinutes(15);
-
-        $currCode = $this->verificationCodes()->where('type', 'email-verification')->first();
-
-        if ($currCode?->expires_at->isFuture()) {
-            return null;
-        }
-
-        $code = random_int(min: 10_000_000, max: 99_999_999);
-
-        $this->verificationCodes()->create([
-            'code' => Hash::make($code),
-            'type' => 'email-verification',
-            'expires_at' => $expiresAt
-        ]);
-
-        return (string) $code;
+        $code =  $this->createCode('email-verification', $expiryInMinutes);
+        Context::addHidden('code', $code);
     }
 
     /**
      * Send the email verification notification.
-     *
-     * @return void
      */
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerificationNotification(): void
     {
-        // $this->notify(new EmailVerification);
+        // NOTE: using Context to pass the code instead of a parameter to 
+        // adhere to the Illuminate\Contracts\Auth\MustVerifyEmail interface.
+        $this->notify(new EmailVerification(Context::getHidden('code')));
     }
 
     /**
      * Create a new password reset verification code.
-     *
-     * @return string|null
      */
-    public function createPasswordResetCode(?int $expiryInMinutes = null)
+    public function createPasswordResetCode(?int $expiryInMinutes = null): string
     {
+        return $this->createCode('password-reset', $expiryInMinutes);
+    }
+
+    /**
+     * Send the password reset notification.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        // NOTE: 'token' is synonymous with 'code'. 
+        // Illuminate\Contracts\Auth\CanResetPassword interface uses 'token' as parameter name.
+        $this->notify(new PasswordReset($token));
+    }
+
+    /**
+     * Create a VerificationCode of the given type.
+     */
+    private function createCode(string $type, ?int $expiryInMinutes = null): string
+    {
+        $expiryConfigName = match ($type) {
+            'password-reset' => 'sneeze.password_reset_expiry',
+            'email-verification' => 'sneeze.email_verification_expiry',
+            default => throw new \Exception('Invalid code type')
+        };
+
         if ($expiryInMinutes === null || $expiryInMinutes <= 0) {
-            $expiryInMinutes = config('sneeze.password_reset_expiry');
-            Context::add('expiry', config('sneeze.password_reset_expiry'));
+            $expiryInMinutes = config($expiryConfigName);
+            Context::add('expiry', config($expiryConfigName));
         } else {
             Context::add('expiry', $expiryInMinutes);
         }
 
-        $currCode = $this->verificationCodes()->where('type', 'password-reset')->first();
+        $currCode = $this->verificationCodes()->where('type', $type)->first();
         $code = (string) random_int(min: 10_000_000, max: 99_999_999);
 
         if ($currCode === null) {
             $this->verificationCodes()->create([
                 'code' => Hash::make($code),
-                'type' => 'password-reset',
+                'type' => $type,
                 'expires_at' => now()->addMinutes($expiryInMinutes)
             ]);
         } else {
@@ -84,18 +89,5 @@ trait HasVerificationCodes
         }
 
         return $code;
-    }
-
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     * @return void
-     */
-    public function sendPasswordResetNotification(#[\SensitiveParameter] $token)
-    {
-        // NOTE: 'token' is synonymous with 'code'. 
-        // Illuminate\Contracts\Auth\CanResetPassword interface uses 'token' as parameter name.
-        $this->notify(new PasswordReset($token));
     }
 }
