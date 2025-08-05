@@ -4,9 +4,10 @@ namespace BoilingSoup\Sneeze;
 
 use BoilingSoup\Sneeze\Notifications\EmailVerification;
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 trait HasVerificationCodes
 {
@@ -56,9 +57,50 @@ trait HasVerificationCodes
     }
 
     /**
+     * Check if the User has a valid reset code and if the code matches the stored hash.
+     * Returns true if the code is valid.
+     */
+    public function checkPasswordResetCodeHash(string $code): bool
+    {
+        $storedCode = $this->getPasswordResetCode();
+
+        if ($storedCode === null || $storedCode->isInvalid()) {
+            return false;
+        }
+
+        return Hash::check($code, $storedCode->code);
+    }
+
+    /**
+     * Perform a DB transaction to update the User's password and mark the password-reset
+     * code as used.
+     */
+    public function resetPassword(string $hashedPassword): bool
+    {
+        $storedCode = $this->getPasswordResetCode();
+
+        try {
+            // update User and mark password-reset Code as used.
+            DB::transaction(function () use ($hashedPassword, $storedCode) {
+                $this->forceFill([
+                    'password' => $hashedPassword,
+                    'remember_token' => Str::random(60)
+                ])->save();
+
+                $storedCode->is_used = true;
+                $storedCode->save();
+            });
+        } catch (\Exception) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the User's password-reset code stored in the database (if it exists.)
      */
-    public function getPasswordResetCode()
+    protected function getPasswordResetCode()
     {
         return $this->verificationCodes()->where('type', 'password-reset')->first();
     }
@@ -66,7 +108,7 @@ trait HasVerificationCodes
     /**
      * Create a VerificationCode of the given type.
      */
-    private function createCode(string $type, ?int $expiryInMinutes = null): string
+    protected function createCode(string $type, ?int $expiryInMinutes = null): string
     {
         $expiryConfigName = match ($type) {
             'password-reset' => 'sneeze.password_reset_expiry',

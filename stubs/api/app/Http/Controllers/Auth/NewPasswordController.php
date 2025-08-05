@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class NewPasswordController extends Controller
@@ -32,24 +30,13 @@ class NewPasswordController extends Controller
 
         $user = $user->first();
 
-        $storedCode = $user->getPasswordResetCode();
-
-        if ($storedCode === null || $storedCode->isInvalid() || !Hash::check($request->code, $storedCode->code)) {
+        if (!$user->checkPasswordResetCodeHash($request->code)) {
             return response(['message' => 'This password reset code is invalid.'], 403);
         }
 
-        try {
-            // update User and mark password-reset Code as used.
-            DB::transaction(function () use ($request, $user, $storedCode) {
-                $user->forceFill([
-                    'password' => Hash::make($request->string('password')),
-                    'remember_token' => Str::random(60)
-                ])->save();
+        $success = $user->resetPassword(Hash::make($request->string('password')));
 
-                $storedCode->is_used = true;
-                $storedCode->save();
-            });
-        } catch (\Exception) {
+        if (!$success) {
             return response(['status' => 'Failed to reset password.'], 500);
         }
 
