@@ -26,4 +26,12 @@ class VerificationCode extends Model
         'type',
         'expires_at',
     ];
+
+    /**
+     * Checks whether the code has been used or expired.
+     */
+    public function isInvalid()
+    {
+        return $this->is_used || $this->expires_at->isPast();
+    }
 }

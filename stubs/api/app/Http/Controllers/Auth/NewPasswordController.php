@@ -15,8 +15,6 @@ class NewPasswordController extends Controller
 {
     /**
      * Handle an incoming new password request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request)
     {
@@ -34,9 +32,9 @@ class NewPasswordController extends Controller
 
         $user = $user->first();
 
-        $storedCode = $user->verificationCodes()->where('type', 'password-reset')->first();
+        $storedCode = $user->getPasswordResetCode();
 
-        if ($storedCode === null || $storedCode->is_used || $storedCode->expires_at->isPast() || !Hash::check($request->code, $storedCode->code)) {
+        if ($storedCode === null || $storedCode->isInvalid() || !Hash::check($request->code, $storedCode->code)) {
             return response(['message' => 'This password reset code is invalid.'], 403);
         }
 

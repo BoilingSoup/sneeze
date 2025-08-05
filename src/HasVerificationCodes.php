@@ -4,6 +4,7 @@ namespace BoilingSoup\Sneeze;
 
 use BoilingSoup\Sneeze\Notifications\EmailVerification;
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Hash;
 
@@ -52,6 +53,14 @@ trait HasVerificationCodes
         // NOTE: 'token' is synonymous with 'code'. 
         // Illuminate\Contracts\Auth\CanResetPassword interface uses 'token' as parameter name.
         $this->notify(new PasswordReset($token));
+    }
+
+    /**
+     * Get the User's password-reset code stored in the database (if it exists.)
+     */
+    public function getPasswordResetCode()
+    {
+        return $this->verificationCodes()->where('type', 'password-reset')->first();
     }
 
     /**
