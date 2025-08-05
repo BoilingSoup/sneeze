@@ -1,0 +1,66 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - '*.x'
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  stub-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        laravel: [11, 12]
+        args: ["", --pest]
+        include:
+          - laravel: 11
+          - laravel: 12
+
+    name: Test Stubs - Laravel ${{ matrix.laravel }} - ${{ matrix.args }}
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip
+          ini-values: error_reporting=E_ALL
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Laravel
+        run: |
+          composer create-project laravel/laravel:^${{ matrix.laravel }} .
+          composer require boilingsoup/sneeze:@dev --no-interaction --no-update
+          composer config repositories.sneeze '{"type": "path", "url": "sneeze"}' --file composer.json
+        if: matrix.laravel < 12
+
+      - name: Setup Laravel (dev-master)
+        run: |
+          composer create-project laravel/laravel:dev-master .
+          composer require boilingsoup/sneeze:@dev --no-interaction --no-update
+          composer config repositories.sneeze '{"type": "path", "url": "sneeze"}' --file composer.json
+        if: matrix.laravel == 12
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: 'sneeze'
+
+      - name: Install Sneeze
+        run: |
+          composer update "boilingsoup/sneeze" --prefer-dist --no-interaction --no-progress -W
+          php artisan sneeze:install ${{ matrix.args }}
+
+      - name: Execute tests
+        run: ${{ matrix.args == '--pest' && 'vendor/bin/pest' || 'vendor/bin/phpunit' }}
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
