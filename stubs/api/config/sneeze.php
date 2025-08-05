@@ -1,15 +1,21 @@
 <?php
 
 return [
-    // Time in minutes before email verification code expires.
-    'email_verification_expiry' => 15,
+    // Function that returns the email verification code's expiration time.
+    // ex. When User requests an email verification code, the verification code is valid for 15 minutes.
+    'email_verification_expiration_fn' => function () {
+        return now()->addMinutes(15);
+    },
 
-    // Time in minutes before password reset code expires.
-    'password_reset_expiry' => 15,
+    // Function that returns the password reset code's expiration time.
+    // ex. When User requests a password reset, the reset code is valid for 15 minutes.
+    'password_reset_expiration_fn' => function () {
+        return now()->addMinutes(15);
+    },
 
-    // Function to generate sanctum auth token expiry time.
+    // Function that returns the sanctum auth token's expiration time.
     // ex. When User registers/logs in, their token is valid for 1 month.
-    'sanctum_auth_token_expiry_fn' => function () {
+    'sanctum_auth_token_expiration_fn' => function () {
         return now()->addMonths(1);
     }
 ];

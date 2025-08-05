@@ -26,9 +26,7 @@ class PasswordResetLinkController extends Controller
         /** @var User */
         $user = $user->first();
 
-        // expiryInMinutes = null is the default and will use config('sneeze.password_reset_expiry').
-        // You can optionally pass in the desired expiry in minutes as an integer.
-        $code = $user->createPasswordResetCode(expiryInMinutes: null);
+        $code = $user->createPasswordResetCode(expiresAt: config('sneeze.password_reset_expiration_fn')());
 
         if ($code !== null) {
             $user->sendPasswordResetNotification($code);

@@ -16,9 +16,7 @@ class EmailVerificationNotificationController extends Controller
             return response(['message' => 'Your email is already verified.'], 422);
         }
 
-        // expiryInMinutes = null is the default and will use config('sneeze.email_verification_expiry').
-        // You can optionally pass in the desired expiry in minutes as an integer.
-        $request->user()->createEmailVerificationCode(expiryInMinutes: null);
+        $request->user()->createEmailVerificationCode(expiresAt: config('sneeze.email_verification_expiration_fn')());
 
         $request->user()->sendEmailVerificationNotification();
 

@@ -4,6 +4,9 @@ namespace BoilingSoup\Sneeze;
 
 use BoilingSoup\Sneeze\Notifications\EmailVerification;
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
+use DateTimeInterface;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,10 +24,11 @@ trait HasVerificationCodes
 
     /**
      * Create a new email verification code.
+     * If no expiration is provided, the default will be used from config/sneeze.php
      */
-    public function createEmailVerificationCode(?int $expiryInMinutes = null): void
+    public function createEmailVerificationCode(?DateTimeInterface $expiresAt = null): void
     {
-        $code =  $this->createCode('email-verification', $expiryInMinutes);
+        $code =  $this->createCode('email-verification', $expiresAt);
         Context::addHidden('code', $code);
     }
 
@@ -55,10 +59,11 @@ trait HasVerificationCodes
 
     /**
      * Create a new password reset verification code.
+     * If no expiration is provided, the default will be used from config/sneeze.php
      */
-    public function createPasswordResetCode(?int $expiryInMinutes = null): string
+    public function createPasswordResetCode(?DateTimeInterface $expiresAt = null): string
     {
-        return $this->createCode('password-reset', $expiryInMinutes);
+        return $this->createCode('password-reset', $expiresAt);
     }
 
     /**
@@ -131,19 +136,27 @@ trait HasVerificationCodes
     /**
      * Create a VerificationCode of the given type.
      */
-    protected function createCode(string $type, ?int $expiryInMinutes = null): string
+    protected function createCode(string $type, ?DateTimeInterface $expiresAt = null): string
     {
-        $expiryConfigName = match ($type) {
-            'password-reset' => 'sneeze.password_reset_expiry',
-            'email-verification' => 'sneeze.email_verification_expiry',
+        $expirationFuncConfigName = match ($type) {
+            'password-reset' => 'sneeze.password_reset_expiration_fn',
+            'email-verification' => 'sneeze.email_verification_expiration_fn',
             default => throw new \Exception('Invalid code type')
         };
 
-        if ($expiryInMinutes === null || $expiryInMinutes <= 0) {
-            $expiryInMinutes = config($expiryConfigName);
-            Context::add('expiry', config($expiryConfigName));
+        if ($expiresAt === null) {
+            $expiresAt = config($expirationFuncConfigName)();
+            Context::add(
+                'expiration',
+                config($expirationFuncConfigName)()
+                    ->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::CEIL)
+            );
         } else {
-            Context::add('expiry', $expiryInMinutes);
+            Context::add(
+                'expiration',
+                Carbon::parse($expiresAt)
+                    ->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::CEIL)
+            );
         }
 
         $currCode = $this->verificationCodes()->where('type', $type)->first();
@@ -153,11 +166,11 @@ trait HasVerificationCodes
             $this->verificationCodes()->create([
                 'code' => Hash::make($code),
                 'type' => $type,
-                'expires_at' => now()->addMinutes($expiryInMinutes)
+                'expires_at' => $expiresAt
             ]);
         } else {
             $currCode->code = Hash::make($code);
-            $currCode->expires_at = now()->addMinutes($expiryInMinutes);
+            $currCode->expires_at = $expiresAt;
             $currCode->is_used = false;
             $currCode->save();
         }

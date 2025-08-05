@@ -32,12 +32,12 @@ class PasswordReset extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $expiryInMinutes = Context::get('expiry');
+        $expiration = Context::get('expiration'); // data is formatted with Carbon's diffForHumans() method.
 
         return (new MailMessage)
             ->subject("Reset Password Notification")
             ->line("Your password reset code is {$this->code}")
-            ->line("The reset code will expire in {$expiryInMinutes} minutes. If you did not request a password reset, no further action is required.");
+            ->line("The reset code will expire in {$expiration}. If you did not request a password reset, no further action is required.");
     }
 
     /**

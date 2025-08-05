@@ -32,12 +32,12 @@ class EmailVerification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $expiryInMinutes = Context::get('expiry');
+        $expiration = Context::get('expiration'); // data is formatted with Carbon's diffForHumans() method.
 
         return (new MailMessage)
             ->subject("Email Verification")
             ->line("Your email verification code is {$this->code}")
-            ->line("The verification code will expire in {$expiryInMinutes} minutes. If you did not create an account, no further action is required.");
+            ->line("The verification code will expire in {$expiration}. If you did not create an account, no further action is required.");
     }
 
     /**
