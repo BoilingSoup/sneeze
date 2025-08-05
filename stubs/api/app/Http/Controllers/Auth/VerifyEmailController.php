@@ -4,20 +4,26 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 class VerifyEmailController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
      */
-    public function __invoke(EmailVerificationRequest $request)
+    public function __invoke(Request $request)
     {
+        $request->validate([
+            'code' => ['required'],
+        ]);
+
         if ($request->user()->hasVerifiedEmail()) {
             return response()->noContent();
         }
 
-        // TODO: check verification code
+        if (!$request->user()->checkEmailVerificationCodeHash($request->string('code'))) {
+            return response(['message' => 'This verification code is invalid.'], 403);
+        }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));

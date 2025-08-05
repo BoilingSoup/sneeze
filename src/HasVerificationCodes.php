@@ -39,6 +39,21 @@ trait HasVerificationCodes
     }
 
     /**
+     * Check if the User has a valid email verification code and if the code matches the stored hash.
+     * Returns true if the code is valid.
+     */
+    public function checkEmailVerificationCodeHash(string $code): bool
+    {
+        $storedCode = $this->getEmailVerificationCode();
+
+        if ($storedCode === null || $storedCode->isInvalid()) {
+            return false;
+        }
+
+        return Hash::check($code, $storedCode->code);
+    }
+
+    /**
      * Create a new password reset verification code.
      */
     public function createPasswordResetCode(?int $expiryInMinutes = null): string
@@ -95,6 +110,14 @@ trait HasVerificationCodes
         }
 
         return true;
+    }
+
+    /**
+     * Get the User's email-verification code stored in the database (if it exists.)
+     */
+    protected function getEmailVerificationCode()
+    {
+        return $this->verificationCodes()->where('type', 'email-verification')->first();
     }
 
     /**
