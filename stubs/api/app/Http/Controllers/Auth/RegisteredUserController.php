@@ -35,7 +35,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // NOTE: You may assign any name you like. Check the Sanctum docs for more information.
+        // NOTE: You may assign any name and expiration you like. Check the Sanctum docs for more information.
         $token = $user->createToken(name: 'user', expiresAt: now()->addMonths(1));
 
         return [

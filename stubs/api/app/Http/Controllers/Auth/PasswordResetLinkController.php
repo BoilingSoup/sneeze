@@ -23,6 +23,7 @@ class PasswordResetLinkController extends Controller
             return response(["message" => "We can't find a user with that email address."], 422);
         }
 
+        /** @var User */
         $user = $user->first();
 
         // expiryInMinutes = null is the default and will use config('sneeze.password_reset_expiry').

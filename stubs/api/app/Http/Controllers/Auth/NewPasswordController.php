@@ -28,6 +28,7 @@ class NewPasswordController extends Controller
             return response(["message" => "We can't find a user with that email address."], 422);
         }
 
+        /** @var User */
         $user = $user->first();
 
         if (!$user->checkPasswordResetCodeHash($request->code)) {
