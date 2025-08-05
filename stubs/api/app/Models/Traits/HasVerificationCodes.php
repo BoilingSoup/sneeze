@@ -1,9 +1,9 @@
 <?php
 
-namespace BoilingSoup\Sneeze;
+namespace App\Models\Traits;
 
-use BoilingSoup\Sneeze\Notifications\EmailVerification;
-use BoilingSoup\Sneeze\Notifications\PasswordReset;
+use App\Notifications\Auth\EmailVerification;
+use App\Notifications\Auth\PasswordReset;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
@@ -19,7 +19,7 @@ trait HasVerificationCodes
      */
     public function verificationCodes()
     {
-        return $this->hasMany(VerificationCode::class);
+        return $this->hasMany(\BoilingSoup\Sneeze\VerificationCode::class);
     }
 
     /**

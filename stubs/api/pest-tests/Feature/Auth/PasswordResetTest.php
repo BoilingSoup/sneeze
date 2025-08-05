@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use BoilingSoup\Sneeze\Notifications\PasswordReset;
+use App\Notifications\Auth\PasswordReset;
 use Illuminate\Support\Facades\Notification;
 
 test('reset password code can be requested', function () {

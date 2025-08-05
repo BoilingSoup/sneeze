@@ -54,21 +54,24 @@ class InstallCommand extends Command
             'verified' => '\App\Http\Middleware\EnsureEmailIsVerified::class',
         ]);
 
-        // $this->installMiddleware([
-        //     '\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class',
-        // ], 'api', 'prepend');
-
-        // User Model...
-        if (!$this->updateUserModel()) {
-            return 1;
-        }
-
-        $this->components->info('[Laravel\Sanctum\HasApiTokens] trait has been added to your User model successfully.');
-        $this->components->info('[BoilingSoup\Sneeze\HasVerificationCodes] trait has been added to your User model successfully.');
-
         // Requests...
         $files->ensureDirectoryExists(app_path('Http/Requests/Auth'));
         $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Http/Requests/Auth', app_path('Http/Requests/Auth'));
+
+        // Model Traits...
+        $files->ensureDirectoryExists(app_path('Models/Traits'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Models/Traits', app_path('Models/Traits'));
+
+        // Notifications...
+        $files->ensureDirectoryExists(app_path('Notifications/Auth'));
+        $files->copyDirectory(__DIR__ . '/../../stubs/api/app/Notifications/Auth', app_path('Notifications/Auth'));
+
+        // Update User Model...
+        if (!$this->updateUserModel()) {
+            return 1;
+        }
+        $this->components->info('[Laravel\Sanctum\HasApiTokens] trait has been added to your User model successfully.');
+        $this->components->info('[App\Models\Traits\HasVerificationCodes] trait has been added to your User model successfully.');
 
         // Routes...
         copy(__DIR__ . '/../../stubs/api/routes/api.php', base_path('routes/api.php'));
@@ -236,7 +239,7 @@ class InstallCommand extends Command
             return false;
         }
 
-        $userModel = str_replace($traitImportLine, $traitImportLine . PHP_EOL . "use Laravel\Sanctum\HasApiTokens;" . PHP_EOL . "use BoilingSoup\Sneeze\HasVerificationCodes;", $userModel);
+        $userModel = str_replace($traitImportLine, $traitImportLine . PHP_EOL . "use Laravel\Sanctum\HasApiTokens;" . PHP_EOL . "use App\Models\Traits\HasVerificationCodes;", $userModel);
 
         $traitsUsageLine = "use HasFactory, Notifiable;";
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace BoilingSoup\Sneeze\Notifications;
+namespace App\Notifications\Auth;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Context;
 
-class PasswordReset extends Notification
+class EmailVerification extends Notification
 {
     use Queueable;
 
@@ -35,9 +35,9 @@ class PasswordReset extends Notification
         $expiration = Context::get('expiration'); // data is formatted with Carbon's diffForHumans() method.
 
         return (new MailMessage)
-            ->subject("Reset Password Notification")
-            ->line("Your password reset code is {$this->code}")
-            ->line("The reset code will expire in {$expiration}. If you did not request a password reset, no further action is required.");
+            ->subject("Email Verification")
+            ->line("Your email verification code is {$this->code}")
+            ->line("The verification code will expire in {$expiration}. If you did not create an account, no further action is required.");
     }
 
     /**
