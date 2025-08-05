@@ -1,38 +1,44 @@
 <?php
 
 use App\Models\User;
+use BoilingSoup\Sneeze\Notifications\EmailVerification;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Notification;
+use Laravel\Sanctum\Sanctum;
 
-test('email can be verified', function () {
+test('email verification notification is sent', function () {
+    Notification::fake();
     $user = User::factory()->unverified()->create();
+    Sanctum::actingAs($user);
 
-    Event::fake();
+    $response = $this->postJson(route('verification.send'));
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)]
-    );
-
-    $response = $this->actingAs($user)->get($verificationUrl);
-
-    Event::assertDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(config('app.frontend_url').'/dashboard?verified=1');
+    $response->assertSuccessful();
+    Notification::assertSentTo($user, EmailVerification::class);
 });
 
-test('email is not verified with invalid hash', function () {
+test('email can be verified', function () {
+    Event::fake();
+    Notification::fake();
     $user = User::factory()->unverified()->create();
+    Sanctum::actingAs($user);
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')]
-    );
+    $this->postJson(route('verification.send'));
+    $notification = Notification::sent($user, EmailVerification::class)->firstOrFail();
+    $response = $this->postJson(route('verification.verify'), ['code' => $notification->code]);
 
-    $this->actingAs($user)->get($verificationUrl);
+    $response->assertOk();
+    Event::assertDispatched(Verified::class);
+    $this->assertTrue($user->fresh()->hasVerifiedEmail());
+});
 
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+test('email is not verified with invalid code', function () {
+    $user = User::factory()->unverified()->create();
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson(route('verification.verify'), ['code' => 'wrong code']);
+
+    $response->assertForbidden();
+    $this->assertFalse($user->fresh()->hasVerifiedEmail());
 });

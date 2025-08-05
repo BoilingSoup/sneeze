@@ -4,7 +4,7 @@ use App\Models\User;
 use BoilingSoup\Sneeze\Notifications\PasswordReset;
 use Illuminate\Support\Facades\Notification;
 
-test('reset password link can be requested', function () {
+test('reset password code can be requested', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -29,7 +29,7 @@ test('password can be reset with valid code', function () {
             'password_confirmation' => 'password',
         ]);
 
-        $response->assertStatus(200);
+        $response->assertSuccessful();
 
         return true;
     });
