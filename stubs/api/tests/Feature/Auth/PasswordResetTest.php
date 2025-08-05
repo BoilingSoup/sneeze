@@ -42,4 +42,25 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_password_can_not_be_reset_with_invalid_code(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        $this->postJson(route('password.email'), ['email' => $user->email]);
+
+        Notification::assertSentTo($user, PasswordReset::class, function () use ($user) {
+            $response = $this->postJson(route('password.store'), [
+                'code' => 'wrong code',
+                'email' => $user->email,
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ]);
+
+            $response->assertForbidden();
+
+            return true;
+        });
+    }
 }
