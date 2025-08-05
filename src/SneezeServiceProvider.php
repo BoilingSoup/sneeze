@@ -30,6 +30,7 @@ class SneezeServiceProvider extends ServiceProvider implements DeferrableProvide
 
         $this->commands([
             Console\InstallCommand::class,
+            Console\PruneStaleCommand::class
         ]);
     }
 
@@ -40,6 +41,9 @@ class SneezeServiceProvider extends ServiceProvider implements DeferrableProvide
      */
     public function provides()
     {
-        return [Console\InstallCommand::class];
+        return [
+            Console\InstallCommand::class,
+            Console\PruneStaleCommand::class
+        ];
     }
 }

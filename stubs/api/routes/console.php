@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Check every minute and delete any expired sanctum auth tokens from database.
 Schedule::command('sanctum:prune-expired --hours=0')->everyMinute();
+
+// Check every minute and delete any used or expired email verification / password reset codes.
+Schedule::command('sneeze:prune-stale')->everyMinute();
