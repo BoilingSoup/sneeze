@@ -8,8 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Check every minute and delete any expired sanctum auth tokens from database.
+// Prune expired Sanctum tokens (every minute)
 Schedule::command('sanctum:prune-expired --hours=0')->everyMinute();
 
-// Check every minute and delete any used or expired email verification / password reset codes.
+// Prune used or expired verification codes (every minute)
 Schedule::command('sneeze:prune-stale')->everyMinute();
