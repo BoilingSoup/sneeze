@@ -1,6 +1,6 @@
 {
   "name": "boilingsoup/sneeze",
-  "description": "Minimal Laravel stateless authentication scaffolding.",
+  "description": "A Laravel Sanctum token-based auth starter kit",
   "keywords": [
     "laravel",
     "auth",
