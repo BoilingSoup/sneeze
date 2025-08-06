@@ -16,7 +16,7 @@ class EmailVerificationNotificationController extends Controller
             return response(['message' => 'Your email is already verified.'], 422);
         }
 
-        $request->user()->createEmailVerificationCode(expiresAt: config('sneeze.email_verification_expiration_fn')());
+        $request->user()->createEmailVerificationCode(expiresAt: now()->add(config('sneeze.email_verification_expiration')));
 
         $request->user()->sendEmailVerificationNotification();
 

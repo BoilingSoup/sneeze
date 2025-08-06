@@ -138,18 +138,17 @@ trait HasVerificationCodes
      */
     protected function createCode(string $type, ?DateTimeInterface $expiresAt = null): string
     {
-        $expirationFuncConfigName = match ($type) {
+        $expirationConfigName = match ($type) {
             'password-reset' => 'sneeze.password_reset_expiration_fn',
             'email-verification' => 'sneeze.email_verification_expiration_fn',
             default => throw new \Exception('Invalid code type')
         };
 
         if ($expiresAt === null) {
-            $expiresAt = config($expirationFuncConfigName)();
+            $expiresAt = now()->add(config($expirationConfigName));
             Context::add(
                 'expiration',
-                config($expirationFuncConfigName)()
-                    ->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::CEIL)
+                $expiresAt->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::CEIL)
             );
         } else {
             Context::add(
