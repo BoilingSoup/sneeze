@@ -26,7 +26,7 @@ class PasswordResetLinkController extends Controller
         /** @var User */
         $user = $user->first();
 
-        $code = $user->createPasswordResetCode(expiresAt: config('sneeze.password_reset_expiration_fn')());
+        $code = $user->createPasswordResetCode(expiresAt: now()->add(config('sneeze.password_reset_expiration')));
 
         if ($code !== null) {
             $user->sendPasswordResetNotification($code);

@@ -1,25 +1,25 @@
 <p align="center" width="100%">
-  <img width="800" height="275" alt="image" src="https://github.com/user-attachments/assets/50964b1c-2e80-4e71-a24a-ca313335a663" />
+  <img width="800" height="275" alt="image" src="https://github.com/user-attachments/assets/3013e7ef-0868-4ae8-8e4a-de7545f6ab4d" />
 </p>
 
 
 # Sneeze
 
-**Sneeze** is a modern, token-based authentication starter kit for Laravel using Sanctum. Inspired by Breeze, it's designed for API-first apps that need clean, flexible auth — with no frontend assumptions and no reliance on cookies or CSRF.
+**Sneeze** is a modern, token-based authentication starter kit for Laravel using Sanctum. Inspired by Breeze, it's designed for API-first apps that need clean, flexible auth, with no frontend assumptions and no reliance on cookies or CSRF.
 
-Use it with any frontend: mobile, SPA, desktop, TUI — if it can send headers, it works.
+Use it with any frontend: mobile, SPA, desktop, TUI. If it can send headers, it works.
 
 ---
 
 ## 💡 Why Laravel Sneeze?
 
-Breeze is great for traditional Laravel apps — but it's tightly coupled to session cookies, CSRF protection, and frontend-specific flows like email verification links.
+Breeze is great for traditional Laravel apps, but it's tightly coupled to session cookies, CSRF protection, and frontend-specific flows like email verification links.
 
 Sneeze takes a different approach:
 
-- Clients only need to POST data — no clickable links or cookie handling required.
+- Clients only need to POST data. No clickable links or cookie handling required.
 - No CSRF middleware, no session storage, no need to hit the `/csrf-token` endpoint.
-- Auth uses **Bearer tokens**, not cookies — so your frontend can be on the **same domain or any other**.
+- Auth uses **Bearer tokens**, not cookies, so your frontend can be on the **same domain or any other**.
 
 You're not locked into a browser SPA. Whether you're building a mobile app, CLI, TUI, or remote dashboard, Sneeze is designed to get out of your way and let you build.
 
@@ -59,14 +59,14 @@ php artisan sneeze:install --pest  # Installs with Pest tests
 ```
 The `sneeze:install` command will:
 
-- Copy controllers, routes, notifications, traits, etc. into your app/ and routes/ directories
+- Copy controllers, routes, notifications, traits, etc. into your `app/` and `routes/` directories
 
-- Publish config/sneeze.php with all settings
+- Publish `config/sneeze.php` with all settings
 
 ---
 
 ## 🧬 Authentication Flow
-All actions are done via API — no frontend coupling, no session redirects, no need for custom URLs.
+All actions are done via API. No frontend coupling, no session redirects, no need for custom URLs.
 
 | Action                             | Endpoint                                 | Method | Description                          |
 |-----------------------------------|------------------------------------------|--------|--------------------------------------|
@@ -81,40 +81,37 @@ All actions are done via API — no frontend coupling, no session redirects, no 
 ---
 
 ## ⚙️ Configuration
-Sneeze uses configurable **functions** to determine expiration times for tokens and codes. These functions return Carbon instances (Laravel’s date/time library), giving you full control over expiration logic — not just fixed numbers.
+
+Sneeze uses a simple config file to define expiration times for tokens and codes. These are set using [`CarbonInterval`](https://carbon.nesbot.com/docs/#api-carboninterval), which gives you expressive, readable control over durations.
 
 File: `config/sneeze.php`
 
 ```php
+use Carbon\CarbonInterval;
+
 return [
 
     // Set how long Sanctum auth tokens are valid after login or registration
-    'sanctum_auth_token_expiration_fn' => function () {
-        return now()->addMonths(1);
-    },
+    'sanctum_auth_token_expiration' => CarbonInterval::months(1),
 
     // Set how long email verification codes are valid
-    'email_verification_expiration_fn' => function () {
-        return now()->addMinutes(15);
-    },
+    'email_verification_expiration' => CarbonInterval::minutes(15),
 
     // Set how long password reset codes are valid
-    'password_reset_expiration_fn' => function () {
-        return now()->addMinutes(15);
-    }
+    'password_reset_expiration' => CarbonInterval::minutes(15),
 
 ];
 ```
 
-You can customize these functions to return any expiration time using [Carbon](https://carbon.nesbot.com/), Laravel’s built-in date/time helper.
+You can customize these values using any `CarbonInterval` expression.
 
 Example: To make reset codes expire in 30 minutes, change:
 
 ```php
-'password_reset_expiration_fn' => fn () => now()->addMinutes(30),
+'password_reset_expiration' => CarbonInterval::minutes(30),
 ```
-
-These functions are evaluated **at the time the token or code is created**, giving you dynamic, timezone-aware control.
+CarbonInterval supports durations like `minutes()`, `hours()`, `days()`, `weeks()`, `months()`, and more.
+These intervals are applied **at the time the token or code is created**, ensuring consistent and timezone-aware expiration.
 
 ---
 
@@ -143,12 +140,14 @@ More info: [Laravel Scheduler Documentation](https://laravel.com/docs/scheduling
 - Verification codes are generated using `random_int(10000000, 99999999)` — cryptographically secure.
 
 - Codes are hashed before being stored in the database (like passwords.)
+  
+- Verification codes can only be used **once.**
 
 - Expired or used codes are automatically cleaned up via scheduled task.
 
-- Token expiration is enforced (via Laravel Sanctum.)
+- Auth token expiration is enforced via Laravel Sanctum.
 
-- No CSRF needed — all clients authenticate via Bearer token header.
+- No CSRF is needed. All clients authenticate via Bearer token header.
 
 ---
 
