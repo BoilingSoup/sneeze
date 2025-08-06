@@ -131,16 +131,16 @@ Schedule::command('sneeze:prune-stale')->everyMinute();
 
 These tasks are added automatically when you install Sneeze.
 
-- In development, you can run: php artisan schedule:work
+- In development, you can run: `php artisan schedule:work`
 
-- In production, set up a cron job to run php artisan schedule:run every minute
+- In production, set up a cron job to run `php artisan schedule:run` every minute
 
 More info: [Laravel Scheduler Documentation](https://laravel.com/docs/scheduling#running-the-scheduler)
 
 ---
 
 ## 🔐 Security Notes
-- Verification codes are generated using random_int(10000000, 99999999) — cryptographically secure.
+- Verification codes are generated using `random_int(10000000, 99999999)` — cryptographically secure.
 
 - Codes are hashed before being stored in the database (like passwords.)
 
