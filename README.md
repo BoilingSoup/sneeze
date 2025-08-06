@@ -92,7 +92,7 @@ use Carbon\CarbonInterval;
 return [
 
     // Set how long Sanctum auth tokens are valid after login or registration
-    'sanctum_auth_token_expiration' => CarbonInterval::month(1),
+    'sanctum_auth_token_expiration' => CarbonInterval::months(1),
 
     // Set how long email verification codes are valid
     'email_verification_expiration' => CarbonInterval::minutes(15),
