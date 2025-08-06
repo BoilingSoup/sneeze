@@ -59,9 +59,9 @@ php artisan sneeze:install --pest  # Installs with Pest tests
 ```
 The `sneeze:install` command will:
 
-- Copy controllers, routes, notifications, traits, etc. into your app/ and routes/ directories
+- Copy controllers, routes, notifications, traits, etc. into your `app/` and `routes/` directories
 
-- Publish config/sneeze.php with all settings
+- Publish `config/sneeze.php` with all settings
 
 ---
 
@@ -81,40 +81,37 @@ All actions are done via API — no frontend coupling, no session redirects, no 
 ---
 
 ## ⚙️ Configuration
-Sneeze uses configurable **functions** to determine expiration times for tokens and codes. These functions return Carbon instances (Laravel’s date/time library), giving you full control over expiration logic — not just fixed numbers.
+
+Sneeze uses a simple config file to define expiration times for tokens and codes. These are set using [`CarbonInterval`](https://carbon.nesbot.com/docs/#api-carboninterval), which gives you expressive, readable control over durations.
 
 File: `config/sneeze.php`
 
 ```php
+use Carbon\CarbonInterval;
+
 return [
 
     // Set how long Sanctum auth tokens are valid after login or registration
-    'sanctum_auth_token_expiration_fn' => function () {
-        return now()->addMonths(1);
-    },
+    'sanctum_auth_token_expiration' => CarbonInterval::month(1),
 
     // Set how long email verification codes are valid
-    'email_verification_expiration_fn' => function () {
-        return now()->addMinutes(15);
-    },
+    'email_verification_expiration' => CarbonInterval::minutes(15),
 
     // Set how long password reset codes are valid
-    'password_reset_expiration_fn' => function () {
-        return now()->addMinutes(15);
-    }
+    'password_reset_expiration' => CarbonInterval::minutes(15),
 
 ];
 ```
 
-You can customize these functions to return any expiration time using [Carbon](https://carbon.nesbot.com/), Laravel’s built-in date/time helper.
+You can customize these values using any `CarbonInterval` expression.
 
 Example: To make reset codes expire in 30 minutes, change:
 
 ```php
-'password_reset_expiration_fn' => fn () => now()->addMinutes(30),
+'password_reset_expiration' => CarbonInterval::minutes(30),
 ```
-
-These functions are evaluated **at the time the token or code is created**, giving you dynamic, timezone-aware control.
+CarbonInterval supports durations like `minutes()`, `hours()`, `days()`, `weeks()`, `months()`, and more.
+These intervals are applied **at the time the token or code is created**, ensuring consistent and timezone-aware expiration.
 
 ---
 
