@@ -118,6 +118,27 @@ These functions are evaluated **at the time the token or code is created**, givi
 
 ---
 
+## ⏱ Scheduled Tasks
+Sneeze registers two scheduled tasks in `routes/console.php` to keep your auth tables clean:
+
+```php
+// Prune expired Sanctum tokens (every minute)
+Schedule::command('sanctum:prune-expired --hours=0')->everyMinute();
+
+// Prune used or expired verification codes (every minute)
+Schedule::command('sneeze:prune-stale')->everyMinute();
+```
+
+These tasks are added automatically when you install Sneeze.
+
+- In development, you can run: php artisan schedule:work
+
+- In production, set up a cron job to run php artisan schedule:run every minute
+
+More info: [Laravel Scheduler Documentation](https://laravel.com/docs/scheduling#running-the-scheduler)
+
+---
+
 ## 🔐 Security Notes
 - Verification codes are generated using random_int(10000000, 99999999) — cryptographically secure.
 
